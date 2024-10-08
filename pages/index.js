@@ -362,7 +362,6 @@ setShowCountryButtons(false)
       display: flex;
       justify-content: center;
       align-items: center;
-      background: url('https://www.worldguessr.com/street1.jpg') no-repeat center center/cover;
       font-family: 'Arial', sans-serif;
     }
 
@@ -1582,11 +1581,6 @@ setShowCountryButtons(false)
         msUserSelect: 'none',
         pointerEvents: 'none',
       }}>
-      <NextImage.default src={'/street1.jpg'}
-      draggable={false}
-      fill   alt="Game Background" style={{objectFit: "cover",userSelect:'none'}}
-      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-      />
       </div>
 
 
