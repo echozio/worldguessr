@@ -16,7 +16,6 @@ import ExplanationModal from "./explanationModal";
 import SaveStreakBanner from "./streakSaveBanner";
 import { toast } from "react-toastify";
 import sendEvent from "./utils/sendEvent";
-import Ad from "./bannerAd";
 import fixBranding from "./utils/fixBranding";
 import gameStorage from "./utils/localStorage";
 import RoundOverScreen from "./roundOverScreen";
@@ -25,10 +24,8 @@ const MapWidget = dynamic(() => import("../components/Map"), { ssr: false });
 
 export default function GameUI({ singlePlayerRound, setSinglePlayerRound, showDiscordModal, setShowDiscordModal, inCrazyGames, showPanoOnResult, setShowPanoOnResult, countryGuesserCorrect, setCountryGuesserCorrect, otherOptions, onboarding, setOnboarding, countryGuesser, options, timeOffset, ws, multiplayerState, backBtnPressed, setMultiplayerState, countryStreak, setCountryStreak, loading, setLoading, session, gameOptionsModalShown, setGameOptionsModalShown, latLong, streetViewShown, setStreetViewShown, loadLocation, gameOptions, setGameOptions, showAnswer, setShowAnswer, pinPoint, setPinPoint, hintShown, setHintShown, xpEarned, setXpEarned, showCountryButtons, setShowCountryButtons }) {
   const { t: text } = useTranslation("common");
-  const [showStreakAdBanner, setShowStreakAdBanner] = useState(false);
 
   function loadLocationFuncRaw() {
-    setShowStreakAdBanner(false)
     if(onboarding) {
       if(onboarding.round === 5) {
         setOnboarding((prev)=>{
@@ -88,35 +85,7 @@ export default function GameUI({ singlePlayerRound, setSinglePlayerRound, showDi
   }
 
   function loadLocationFunc() {
-
-    function afterAd() {
-
-      if(!setShowDiscordModal || showDiscordModal) return;
-      const loadTime = window.gameOpen;
-      const lastDiscordShown = gameStorage.getItem("shownDiscordModal");
-      if(lastDiscordShown) return console.log("Discord modal already shown");
-      if(Date.now() - loadTime > 600000) {
-        setShowDiscordModal(true)
-        sendEvent('discord_modal_shown')
-      } else console.log("Not showing discord modal, waiting for "+(600000 - (Date.now() - loadTime))+"ms")
-    }
-
-    if(window.show_videoad) {
-      window.show_videoad((state) =>{
-        if(!['DISABLED', 'COOLDOWN'].includes(state)) {
-      toast.info(text("watchingAdsSupport"))
-        }
-
-        afterAd()
-
-        loadLocationFuncRaw()
-      });
-    } else {
-      afterAd()
       loadLocationFuncRaw()
-    }
-
-
   }
 
   const { width, height } = useWindowDimensions();
@@ -367,39 +336,10 @@ export default function GameUI({ singlePlayerRound, setSinglePlayerRound, showDi
         setLostCountryStreak(0);
         if(country === latLong.country) {
           setCountryStreak(countryStreak + 1);
-          setShowStreakAdBanner(false);
         } else if(country !== "Unknown") {
           setCountryStreak(0);
           setLostCountryStreak(countryStreak);
 
-          if(countryStreak > 0 && window.adBreak && !inCrazyGames) {
-          console.log("requesting reward ad")
-          window.adBreak({
-            type: 'reward',  // rewarded ad
-            name: 'reward-continue',
-            beforeReward: (showAdFn) => {
-              window.showRewardedAdFn = () => { showAdFn();
-                sendEvent('reward_ad_play', { countryStreak });
-                };
-              // Rewarded ad available - prompt user for a rewarded ad
-              setShowStreakAdBanner(true);
-              sendEvent('reward_ad_available', { countryStreak });
-              console.log("reward ad available")
-            },
-            beforeAd: () => { },     // You may also want to mute the game's sound.
-            adDismissed: () => {
-              toast.error(text("adDismissed"));
-              sendEvent('reward_ad_dismissed', { countryStreak });
-            },
-            adViewed: () => {
-              setCountryStreak(countryStreak);
-              setLostCountryStreak(0);
-              toast.success(text("streakRestored"));
-              sendEvent('reward_ad_viewed', { countryStreak });
-            },       // Reward granted - continue game at current score.
-            afterAd: () => { setShowStreakAdBanner(false) },       // Resume the game flow.
-          });
-        }
         }
       }
     findCountry({ lat: pinPoint.lat, lon: pinPoint.lng }).then((country) => {
@@ -437,7 +377,6 @@ export default function GameUI({ singlePlayerRound, setSinglePlayerRound, showDi
 
 { !onboarding && !inCrazyGames && (
     <div className={`topAdFixed ${(multiplayerTimerShown || onboardingTimerShown || singlePlayerRound)?'moreDown':''}`}>
-    <Ad inCrazyGames={inCrazyGames} showAdvertisementText={false} screenH={height} types={[[320, 50],[728,90]]} centerOnOverflow={600} screenW={Math.max(400, width-450)} vertThresh={0.3} />
     </div>
 )}
 
@@ -613,9 +552,8 @@ onHomePress={() =>{
   { showAnswer && showClueBanner && (
 <ClueBanner session={session} explanations={explanations} close={() => {setShowClueBanner(false)}} />
   )}
-        <SaveStreakBanner shown={showStreakAdBanner} close={() => {
-          setShowStreakAdBanner(false)
-        }} lostCountryStreak={lostCountryStreak} playAd={()=>{window.showRewardedAdFn()}} setLostCountryStreak={setLostCountryStreak} countryStreak={countryStreak} setCountryStreak={setCountryStreak} />
+        <SaveStreakBanner close={() => {
+        }} lostCountryStreak={lostCountryStreak} setLostCountryStreak={setLostCountryStreak} countryStreak={countryStreak} setCountryStreak={setCountryStreak} />
 
 <EndBanner singlePlayerRound={singlePlayerRound} onboarding={onboarding} countryGuesser={countryGuesser} countryGuesserCorrect={countryGuesserCorrect} options={options} countryStreak={countryStreak} lostCountryStreak={lostCountryStreak} xpEarned={xpEarned} usedHint={hintShown} session={session}  guessed={showAnswer} latLong={latLong} pinPoint={pinPoint} fullReset={()=>{
   loadLocationFunc()

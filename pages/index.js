@@ -23,13 +23,11 @@ import { useTranslation } from 'next-i18next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import useWindowDimensions from "@/components/useWindowDimensions";
 import dynamic from "next/dynamic";
-import Ad from "@/components/bannerAd";
 import Script from "next/script";
 import SettingsModal from "@/components/settingsModal";
 import sendEvent from "@/components/utils/sendEvent";
 import initWebsocket from "@/components/utils/initWebsocket";
 import 'react-toastify/dist/ReactToastify.css';
-// const Ad = dynamic(() => import('@/components/bannerAd'), { ssr: false });
 
 import NextImage from "next/image";
 import OnboardingText from "@/components/onboardingText";
@@ -1559,14 +1557,7 @@ setShowCountryButtons(false)
           <div className="footer_btns">
         { !isApp && (
                   <>
-                  { !inCrazyGames && (
-                    <>
-                <Link target="_blank" href={"https://discord.gg/ubdJHjKtrC"}><button className="home__squarebtn gameBtn discord" aria-label="Discord"><FaDiscord className="home__squarebtnicon" /></button></Link>
-                <Link target="_blank" href={"https://www.youtube.com/@worldguessr?sub_confirmation=1"}><button className="home__squarebtn gameBtn youtube" aria-label="Youtube"><FaYoutube className="home__squarebtnicon" /></button></Link>
-                <Link target="_blank" href={"https://github.com/codergautam/worldguessr"}><button className="home__squarebtn gameBtn" aria-label="Github"><FaGithub className="home__squarebtnicon" /></button></Link>
-                </>
-                )}
-                <Link href={"/leaderboard"+(inCrazyGames ? "?crazygames": "")}>
+                <Link href={"/leaderboard"}>
 
                 <button className="home__squarebtn gameBtn" aria-label="Leaderboard"><FaRankingStar className="home__squarebtnicon" /></button></Link>
                 </>
@@ -1700,9 +1691,6 @@ setShowCountryButtons(false)
 
           <div style={{ marginTop: "20px" }}>
             <center>
-              { !loading && screen === "home"  && !inCrazyGames && (
-    <Ad inCrazyGames={inCrazyGames} screenH={height} types={[[320, 50],[728,90],[970,90],[970,250]]} screenW={width} />
-              )}
     </center>
             </div>
           </div>
